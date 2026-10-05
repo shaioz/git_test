@@ -47,18 +47,36 @@ user's data, analyzes it, and forecasts the checking-account position.
 - Salary arrives around the **8th** into the main checking account.
 - Credit cards charge around the **10th–11th**.
 
-## End-of-cycle forecast method
+## Never count the deposit
 
-Projected checking total on the 12th =
-current checking balances
-\+ expected salary (ask the user, or use their stated assumption)
-− card charges with `valueDate` between today and the 12th (include immediate
+The Leumi savings deposit (פקדון) is held as a guarantee by the landlord and is
+not available money. Leave it out of every balance, total and forecast.
+
+## Fixed monthly outflows — always factor in
+
+The user has fixed monthly outflows: rent on the 1st (monthly cheque debit),
+a loan repayment around the 15th, a monthly kindergarten transfer, and a weekly
+personal payment made directly, which usually does not appear in the data.
+Amounts and details are in `CLAUDE.local.md` (git-ignored). If that file is
+missing, ask the user for them. Never commit them, because this repo is public.
+Before adding one of these, check whether this month's payment already shows in
+the data. Don't double-count it.
+
+## Forecast method
+
+Projected checking total on a target date =
+current checking balances (deposit excluded)
+\+ expected salary if it lands before the target date (ask the user, or use their
+  stated assumption)
+− card charges with `valueDate` up to the target date (include immediate
   charges not yet in checking)
-− scheduled future-dated checking debits up to the 12th (not after)
-− recurring debits expected before the 12th, estimated from last month.
+− scheduled future-dated checking debits up to the target date
+− the fixed monthly outflows above that are due and not yet paid
+− other recurring debits expected before the target date, estimated from last
+  month (e.g. life insurance ~10th, provident fund ~6th).
 
 Also report:
-- Per-account projections, and the total with and without the savings deposit.
+- Per-account projections.
 - Cycle P&L: projected value on the 12th minus the value on the previous 12th.
   Back-calculate that value as current balance minus checking transactions
   since then.
