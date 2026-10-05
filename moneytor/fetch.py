@@ -1,6 +1,9 @@
 """Pull data from the Moneytor read-only API into local CSV/JSON files.
 
-Usage: MONEYTOR_API_TOKEN=... python moneytor/fetch.py [--out moneytor/data] [--from YYYY-MM-DD] [--to YYYY-MM-DD]
+Usage: python moneytor/fetch.py [--out moneytor/data] [--from YYYY-MM-DD] [--to YYYY-MM-DD]
+
+Auth: set MONEYTOR_API_TOKEN, or leave it unset when the environment's API
+credentials add the Authorization header through the egress proxy.
 
 Each run uses 4+ requests (one per endpoint, plus one per 2000 transactions);
 the API allows 30 per hour and 300 per day.
@@ -20,7 +23,8 @@ def get(path, token, params=None):
     url = f"{BASE}/{path}"
     if params:
         url += "?" + urllib.parse.urlencode({k: v for k, v in params.items() if v is not None})
-    req = urllib.request.Request(url, headers={"Authorization": f"Bearer {token}"})
+    headers = {"Authorization": f"Bearer {token}"} if token else {}
+    req = urllib.request.Request(url, headers=headers)
     try:
         with urllib.request.urlopen(req, timeout=60) as r:
             return json.load(r)
@@ -52,8 +56,6 @@ def main():
     args = p.parse_args()
 
     token = os.environ.get("MONEYTOR_API_TOKEN")
-    if not token:
-        sys.exit("MONEYTOR_API_TOKEN is not set")
     os.makedirs(args.out, exist_ok=True)
 
     worth = get("assetWorth", token)
